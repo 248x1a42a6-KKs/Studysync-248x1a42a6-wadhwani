@@ -1,0 +1,42 @@
+{
+  "name": "studysync",
+  "version": "1.0.0",
+  "description": "AI-generated study plans with real syllabus lookup",
+  "main": "electron-main.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "electron": "electron .",
+    "dist": "electron-builder"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "electron": "^32.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.studysync.app",
+    "productName": "StudySync",
+    "files": [
+      "server.js",
+      "electron-main.js",
+      "public/**/*",
+      ".env"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build-icon-256.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

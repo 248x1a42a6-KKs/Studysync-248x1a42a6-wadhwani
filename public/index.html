@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StudySync</title>
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#1F2A2E" />
+<link rel="icon" href="/icons/icon-192.png" />
+<link rel="apple-touch-icon" href="/icons/icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="StudySync" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Space+Mono:wght@700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1F2A2E;
+    --ink-soft: #5B6660;
+    --paper: #EDEEE7;
+    --surface: #FFFFFF;
+    --amber: #E4A337;
+    --brick: #B0473A;
+    --rule: #D8D6CC;
+    --font-display: 'Space Grotesk', system-ui, sans-serif;
+    --font-mono: 'Space Mono', monospace;
+    --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--paper);
+    font-family: var(--font-body);
+    color: var(--ink);
+    padding: 40px 16px;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  h1 {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    margin: 0 0 4px;
+  }
+  .subtitle { color: var(--ink-soft); margin: 0 0 28px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .label-sm {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+  .subject-row {
+    padding: 12px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .subject-row:first-child { border-top: none; padding-top: 0; }
+  .subject-top { display: flex; gap: 12px; align-items: center; }
+  .subject-top input[type="text"] {
+    flex: 1;
+    border: none;
+    border-bottom: 1px solid var(--rule);
+    background: transparent;
+    padding: 6px 2px;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--ink);
+  }
+  .subject-top input[type="date"] {
+    width: 150px;
+    border: none;
+    border-bottom: 1px solid var(--rule);
+    background: transparent;
+    padding: 6px 2px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--ink);
+  }
+  input:focus { outline: none; border-bottom-color: var(--ink); }
+  .exam-board {
+    margin-top: 8px;
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--rule);
+    background: transparent;
+    padding: 6px 2px;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+  .remove-btn {
+    border: none;
+    background: none;
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 4px 8px;
+  }
+  .remove-btn:hover { opacity: 0.7; }
+  .add-btn {
+    margin-top: 12px;
+    border: none;
+    background: none;
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .add-btn:hover { opacity: 0.7; }
+  .hours-section {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+  }
+  .hours-row { display: flex; align-items: center; gap: 16px; margin-top: 12px; }
+  input[type="range"] { flex: 1; accent-color: var(--ink); }
+  .hours-value {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 1.1rem;
+    width: 60px;
+    text-align: right;
+  }
+  .error-box {
+    margin-top: 16px;
+    background: #F7E9E6;
+    color: var(--brick);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+  }
+  .build-btn {
+    margin-top: 24px;
+    width: 100%;
+    background: var(--ink);
+    color: var(--amber);
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .build-btn:disabled { opacity: 0.6; cursor: default; }
+  .build-btn:hover:not(:disabled) { opacity: 0.9; }
+
+  .countdown {
+    background: var(--ink);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .flap-digits { display: flex; gap: 4px; }
+  .flap-digit {
+    background: var(--ink);
+    color: var(--amber);
+    border: 1px solid rgba(228,163,55,0.3);
+    width: 40px;
+    height: 52px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  .countdown-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #9BA6A0; }
+  .countdown-subject { font-size: 0.9rem; font-weight: 500; color: var(--amber); }
+
+  .plan-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .plan-header h2 { font-family: var(--font-display); font-size: 1.2rem; margin: 0; }
+  .reset-btn { border: none; background: none; color: var(--ink-soft); font-size: 0.9rem; font-weight: 500; cursor: pointer; }
+  .reset-btn:hover { opacity: 0.7; }
+
+  .day-card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .day-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .day-head .day-name { font-family: var(--font-display); font-weight: 700; }
+  .day-head .day-date { font-family: var(--font-mono); font-size: 0.9rem; color: var(--ink-soft); }
+  .block-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .block-row:first-child { border-top: none; padding-top: 0; }
+  .block-subject { font-weight: 600; }
+  .block-focus { color: var(--ink-soft); }
+  .block-hours {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>StudySync</h1>
+    <p class="subtitle">Enter your subjects and exam dates. Get a real study schedule, built from the actual syllabus.</p>
+
+    <div id="formCard" class="card">
+      <div class="label-sm">Subjects</div>
+      <div id="subjectsList"></div>
+      <button class="add-btn" id="addSubjectBtn">+ Add subject</button>
+
+      <div class="hours-section">
+        <div class="label-sm">Plan length</div>
+        <div class="hours-row">
+          <input type="range" id="daysSlider" min="1" max="7" value="7" />
+          <span class="hours-value" id="daysValue">7d</span>
+        </div>
+      </div>
+
+      <div class="hours-section">
+        <div class="label-sm">Hours available per day</div>
+        <div class="hours-row">
+          <input type="range" id="hoursSlider" min="1" max="10" value="3" />
+          <span class="hours-value" id="hoursValue">3h</span>
+        </div>
+      </div>
+
+      <div id="errorBox" class="error-box hidden"></div>
+
+      <button class="build-btn" id="buildBtn">Build my plan</button>
+    </div>
+
+    <div id="planView" class="hidden">
+      <div class="countdown">
+        <div class="flap-digits" id="flapDigits"></div>
+        <div>
+          <div class="countdown-label">Days to nearest exam</div>
+          <div class="countdown-subject" id="nearestSubject"></div>
+        </div>
+      </div>
+
+      <div class="plan-header">
+        <h2 id="planHeading">Your next 7 days</h2>
+        <button class="reset-btn" id="resetBtn">↺ Start over</button>
+      </div>
+
+      <div id="planDays"></div>
+    </div>
+  </div>
+
+<script>
+let subjects = [{ id: 1, name: '', examDate: '', examBoard: '' }];
+let nextId = 2;
+
+const subjectsList = document.getElementById('subjectsList');
+const daysSlider = document.getElementById('daysSlider');
+const daysValue = document.getElementById('daysValue');
+const hoursSlider = document.getElementById('hoursSlider');
+const hoursValue = document.getElementById('hoursValue');
+const errorBox = document.getElementById('errorBox');
+const buildBtn = document.getElementById('buildBtn');
+const formCard = document.getElementById('formCard');
+const planView = document.getElementById('planView');
+
+function renderSubjects() {
+  subjectsList.innerHTML = '';
+  subjects.forEach((s, idx) => {
+    const row = document.createElement('div');
+    row.className = 'subject-row';
+    row.innerHTML = `
+      <div class="subject-top">
+        <input type="text" placeholder="Subject name" value="${s.name}" data-field="name" data-id="${s.id}" />
+        <input type="date" value="${s.examDate}" data-field="examDate" data-id="${s.id}" />
+        <button class="remove-btn" data-remove="${s.id}">✕</button>
+      </div>
+      <input type="text" class="exam-board" placeholder="Exam / board / course (optional, e.g. JEE Main, CBSE Class 12)" value="${s.examBoard}" data-field="examBoard" data-id="${s.id}" />
+    `;
+    subjectsList.appendChild(row);
+  });
+
+  subjectsList.querySelectorAll('input').forEach((input) => {
+    input.addEventListener('input', (e) => {
+      const id = Number(e.target.dataset.id);
+      const field = e.target.dataset.field;
+      const subj = subjects.find((s) => s.id === id);
+      if (subj) subj[field] = e.target.value;
+    });
+  });
+
+  subjectsList.querySelectorAll('[data-remove]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const id = Number(e.target.dataset.remove);
+      if (subjects.length === 1) return;
+      subjects = subjects.filter((s) => s.id !== id);
+      renderSubjects();
+    });
+  });
+}
+
+document.getElementById('addSubjectBtn').addEventListener('click', () => {
+  subjects.push({ id: nextId++, name: '', examDate: '', examBoard: '' });
+  renderSubjects();
+});
+
+daysSlider.addEventListener('input', () => {
+  daysValue.textContent = daysSlider.value + 'd';
+  buildBtn.textContent = `Build my ${daysSlider.value}-day plan`;
+});
+
+hoursSlider.addEventListener('input', () => {
+  hoursValue.textContent = hoursSlider.value + 'h';
+});
+
+function daysUntil(dateStr) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(dateStr);
+  target.setHours(0, 0, 0, 0);
+  return Math.max(0, Math.round((target - today) / 86400000));
+}
+
+function showError(msg) {
+  errorBox.textContent = msg;
+  errorBox.classList.remove('hidden');
+}
+function hideError() {
+  errorBox.classList.add('hidden');
+}
+
+buildBtn.addEventListener('click', async () => {
+  const validSubjects = subjects.filter((s) => s.name.trim() && s.examDate);
+  if (validSubjects.length === 0) {
+    showError('Add at least one subject with a name and exam date.');
+    return;
+  }
+  hideError();
+  buildBtn.disabled = true;
+  buildBtn.textContent = 'Building your plan…';
+
+  const sorted = [...validSubjects].sort((a, b) => new Date(a.examDate) - new Date(b.examDate));
+  const nearestDays = daysUntil(sorted[0].examDate);
+  const nearestSubjectName = sorted[0].name;
+
+  try {
+    const res = await fetch('/api/generate-plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subjects: validSubjects,
+        hoursPerDay: Number(hoursSlider.value),
+        numDays: Number(daysSlider.value),
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to build plan');
+
+    renderPlan(data.plan, nearestDays, nearestSubjectName);
+  } catch (err) {
+    showError(err.message || 'Plan generation failed. Try again.');
+  } finally {
+    buildBtn.disabled = false;
+    buildBtn.textContent = `Build my ${daysSlider.value}-day plan`;
+  }
+});
+
+function renderPlan(plan, nearestDays, nearestSubjectName) {
+  formCard.classList.add('hidden');
+  planView.classList.remove('hidden');
+
+  const digits = String(nearestDays).padStart(2, '0').split('');
+  const flapDigits = document.getElementById('flapDigits');
+  flapDigits.innerHTML = digits.map((d) => `<div class="flap-digit">${d}</div>`).join('');
+  document.getElementById('nearestSubject').textContent = nearestSubjectName;
+  document.getElementById('planHeading').textContent =
+    plan.length === 1 ? 'Your 1-day plan' : `Your next ${plan.length} days`;
+
+  const planDays = document.getElementById('planDays');
+  planDays.innerHTML = plan.map((day) => `
+    <div class="day-card">
+      <div class="day-head">
+        <span class="day-name">${day.day}</span>
+        <span class="day-date">${day.date}</span>
+      </div>
+      ${(day.blocks || []).map((b) => `
+        <div class="block-row">
+          <div>
+            <span class="block-subject">${b.subject}</span>
+            <span class="block-focus"> — ${b.focus}</span>
+          </div>
+          <div class="block-hours">${b.hours}h</div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  planView.classList.add('hidden');
+  formCard.classList.remove('hidden');
+});
+
+renderSubjects();
+buildBtn.textContent = `Build my ${daysSlider.value}-day plan`;
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.warn('Service worker registration failed:', err);
+    });
+  });
+}
+</script>
+</body>
+</html>
