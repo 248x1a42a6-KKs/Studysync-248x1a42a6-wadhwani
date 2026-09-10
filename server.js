@@ -4,15 +4,15 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const API_KEY = process.env.MISTRAL_API_KEY;
-const MODEL = process.env.MISTRAL_MODEL || 'mistral-large-latest';
+const API_KEY = process.env.GOOGLE_API_KEY;
+const MODEL = process.env.GOOGLE_MODEL || 'gemini-2.0-flash';
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/api/generate-plan', async (req, res) => {
   if (!API_KEY) {
-    return res.status(500).json({ error: 'Server is missing MISTRAL_API_KEY. Set it in your .env file.' });
+    return res.status(500).json({ error: 'Server is missing GOOGLE_API_KEY. Set it in your .env file.' });
   }
 
   const { subjects, hoursPerDay, numDays } = req.body;
@@ -63,29 +63,32 @@ Instructions:
 {"plan":[{"date":"YYYY-MM-DD","day":"Mon","blocks":[{"subject":"Physics","focus":"Kinematics: relative motion numericals","hours":1.5}]}]}`;
 
   try {
-    const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' },
-      }),
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseMimeType: 'application/json',
+          },
+        }),
+      }
+    );
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error('Mistral API error:', errText);
+      console.error('Google API error:', errText);
       return res.status(502).json({ error: 'AI service error. Try again.' });
     }
 
     const data = await response.json();
-    // Chat Completions returns choices[0].message.content as a plain string
-    // when response_format is json_object.
-    const text = data.choices?.[0]?.message?.content || '';
+    // Gemini returns the text under candidates[0].content.parts[0].text
+    // when responseMimeType is application/json.
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
     // Strip markdown code fences if present (smaller models sometimes add them
     // despite instructions not to).
@@ -147,3 +150,4 @@ Instructions:
 app.listen(PORT, () => {
   console.log(`StudySync running at http://localhost:${PORT}`);
 });
+      
