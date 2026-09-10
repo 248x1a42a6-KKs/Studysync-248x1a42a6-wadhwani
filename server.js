@@ -5,7 +5,7 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const API_KEY = process.env.GOOGLE_API_KEY;
-const MODEL = process.env.GOOGLE_MODEL || 'gemini-2.0-flash';
+const MODEL = process.env.GOOGLE_MODEL || 'gemini-3.6-flash';
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -150,4 +150,3 @@ Instructions:
 app.listen(PORT, () => {
   console.log(`StudySync running at http://localhost:${PORT}`);
 });
-         
